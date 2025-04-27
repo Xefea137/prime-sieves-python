@@ -1,25 +1,25 @@
 import math
 import numpy as np
-# np.set_printoptions(threshold=np.inf)
 
 def sieve_of_eratosthenes(upper_limit, file_name=None):
-  isPrime = np.ones(upper_limit, dtype=bool)
-  isPrime[0:2] = False
+  size = (upper_limit + 1) // 2
+  isPrime = np.ones(size, dtype=bool)
+  isPrime[0] = False
 
   sqRt = math.isqrt(upper_limit)
-  #sqRt = int(np.sqrt(upper_limit)) + 1
-  for n in range(2, sqRt+1):
-    if isPrime[n]:
-      isPrime[n*n:upper_limit:n] = False
+  for n in range(3, sqRt + 1, 2):
+    if isPrime[n//2]:
+      start = (n*n)//2
+      isPrime[start::n] = False
 
-  prime = np.flatnonzero(isPrime)
+  prime = np.concatenate(([2], 2 * np.flatnonzero(isPrime) + 1))
   
   if file_name:
     np.savetxt(file_name, prime, fmt='%d')
   
   return prime
 
-upper_limit = 100000000
-file_name = None #'primes.txt'
+upper_limit = 1000000000
+file_name = None
 primes = sieve_of_eratosthenes(upper_limit, file_name)
-# print(primes)
+# print(f"Found {len(primes)} primes. First 10 primes: {primes[:10]}")
