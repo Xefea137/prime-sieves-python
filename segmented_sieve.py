@@ -1,47 +1,66 @@
 import numpy as np
 import math
 
-def segmented_sieve(start, stop, chunk_size):
+def generate_base_primes(limit):
+  size = (limit + 1)//2
+  is_prime = np.ones(size, dtype=bool)
+  is_prime[0] = False
+  
+  for n in range(1, size):
+    if is_prime[n]:
+      p = n * 2 + 1
+      is_prime[p*p:size:p] = False
+
+  return np.flatnonzero(is_prime) * 2 + 1
+
+def segmented_sieve(start, stop, segment_length):
   if stop < 2:
     return []
 
   if stop < 3:
     return [2]
 
-  start = max(start, 2)
+  result_primes = []
+  if start <= 2:
+    result_primes.append(2)
 
-  sqrt = math.isqrt(stop)
-  base_sieve = np.ones(sqrt + 1, dtype=bool)
-  base_sieve [[0, 1]] = False
+  start = max(start, 3)
 
-  for n in range(2, sqrt+1):
-    if (base_sieve [n]):
-      base_sieve[n * n:sqrt + 1:n] = False
+  if start % 2 == 0:
+    start += 1
 
-  base_primes = np.flatnonzero(base_sieve)
+  if stop % 2 == 0:
+    stop -= 1
 
-  segment_start = start
-  all_primes = []
-  is_prime_segment = np.ones(chunk_size, dtype=bool)
+  base_primes = generate_base_primes(math.isqrt(stop))
+  
+  is_prime_segment = np.ones(segment_length, dtype=bool)
 
-  while segment_start < stop:
-    segment_size = min(chunk_size, stop - segment_start + 1)
+  while start <= stop:
+    segment_size = min(segment_length, (stop - start)//2 + 1)
     is_prime_segment[:segment_size] = True
-
+    
     for p in base_primes:
-      if p * p > segment_start + segment_size:
+      if p * p > start + ((segment_size - 1) * 2):
         break
 
-      first_multiple = max(p * p, ((segment_start + p - 1) // p) * p)
-      is_prime_segment[first_multiple - segment_start:segment_size:p] = False
+      first_multiple = max(p * p, ((start + p - 1) // p) * p)
+      if first_multiple % 2 == 0:
+        first_multiple += p
 
-    all_primes.extend(np.nonzero(is_prime_segment[:segment_size])[0] + segment_start)
-    segment_start += segment_size
+      start_idx = (first_multiple - start)//2
+      if start_idx < segment_size:
+        is_prime_segment[start_idx:segment_size:p] = False
+
+    result_primes.extend((np.flatnonzero(is_prime_segment[:segment_size]) * 2) + start)
+    start += (segment_size * 2)
   
-  return all_primes
+  return result_primes
 
-start = 0
-stop = 100000000
-chunk_size = 65536
-primes = segmented_sieve(start, stop, chunk_size)
-print(f"Primes in the range [{start}-{stop}]:", primes)
+start = 999990000
+stop = 1000000000
+segment_length = 1000000
+primes = segmented_sieve(start, stop, segment_length)
+
+print(f"Found {len(primes)} primes")
+# print(f"Primes in the range [{start}-{stop}]: ", primes)
