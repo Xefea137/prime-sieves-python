@@ -8,7 +8,7 @@ def sieve_of_eratosthenes(upper_limit, file_name=None):
 
   sqRt = math.isqrt(upper_limit)
   for n in range(1, sqRt//2 + 1):
-    start = 2 * n * (n + 1)
+    start = (n << 1) * (n + 1) # 2 * n * (n + 1) -> (n + n) * (n + 1)
     if isPrime[n]:
       step = (n * 2) + 1
       isPrime[start::step] = False
