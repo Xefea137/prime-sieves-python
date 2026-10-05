@@ -9,7 +9,7 @@ def generate_base_primes(limit):
   for n in range(1, size):
     if is_prime[n]:
       p = n * 2 + 1
-      is_prime[p*p:size:p] = False
+      is_prime[(p*p)//2:size:p] = False
 
   return np.flatnonzero(is_prime) * 2 + 1
 
